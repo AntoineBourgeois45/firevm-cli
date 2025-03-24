@@ -1,4 +1,8 @@
 use clap::{Parser, Subcommand};
+use commands::init::execute_init;
+use serde::{Serialize, Deserialize};
+
+pub mod commands;
 
 #[derive(Parser)]
 #[command(version, name = "firevm", about = "CLI to manage microVMs", long_about = None)]
@@ -27,12 +31,33 @@ enum Commands {
     },
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct VmConfig {
+    pub name: String,
+    pub kernel_image: String,
+    pub rootfs_image: String,
+    pub vcpu_count: u8,
+    pub memory_mb: u32,
+    pub network: NetworkConfig,
+    pub snapshot: SnapshotConfig,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct NetworkConfig {
+    pub mode: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SnapshotConfig {
+    pub enabled: bool,
+}
+
 fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
         Commands::Init { config } => {
-            println!("Initializing VM with config: {}", config);
+            execute_init(config);
         }
         Commands::Run { config } => {
             println!("Running VM with config: {}", config);
